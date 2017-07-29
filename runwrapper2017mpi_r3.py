@@ -3,7 +3,7 @@ import time
 import numpy as np
 import pandas as pd
 
-from pyabmzi.runner2017mpi_r3 import Runner
+from pyziabm.runner2017mpi_r3 import Runner
 
 def participation_to_list(h5in, outlist):
     trade_df = pd.read_hdf(h5in, 'trades')
