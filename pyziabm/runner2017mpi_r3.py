@@ -3,8 +3,8 @@ import time
 import numpy as np
 import pandas as pd
 
-from pyabmzi.orderbook3 import Orderbook
-from pyabmzi.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper
+from pyziabm.orderbook3 import Orderbook
+from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper
 
 
 class Runner(object):
