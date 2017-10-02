@@ -17,7 +17,6 @@ There are five files:
 
 ### trader2017_r3.py
 * Contains the base ZITrader class and four subclasses: PennyJumper, Taker, Provider, MarketMaker.
-* Note: for now the price choice set for Provider and Market Maker are hard-coded to improve simulation speed. The user must comment/uncomment the choices for mpi=1 vs. mpi=5 in Provider and MarketMaker. Potential improvements include writing subclasses or specifying the methods at *construction* time (in a dict, maybe).
 * Imported by runner2017mpi_r3.py.
 
 ### runner2017mpi_r3.py
@@ -34,5 +33,11 @@ There are five files:
 ### runwrapper2017mpi_r3x.py
 * Unix executable version of runwrapper2017mpi_r3.py.
 * Note: User should specify proper paths for the python executable and saving output.
+
+There are two test files:
+1. testOrderbook3.py
+2. testTrader2017_r3.p7
+
+There are several Jupyter Notebooks that should work with minimal changes to the directories.
 
 ### Written and tested with Python3.6
