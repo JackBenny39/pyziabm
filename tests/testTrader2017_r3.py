@@ -2,7 +2,7 @@ import random
 import numpy as np
 import unittest
 
-from pyabmzi.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper
+from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper
 
 
 class TestTrader(unittest.TestCase):
