@@ -8,12 +8,16 @@ class Orderbook(object):
     
     Orderbook is a set of linked lists and dictionaries containing trades, bids and asks.
     One dictionary contains a history of all orders;
+    
     two other dictionaries contain priced bid and ask orders with linked lists for access;
     one dictionary contains trades matched with orders on the book.
+    
     Orderbook also provides methods for storing and retrieving orders and maintaining a 
     history of the book.
+    
     Public attributes: order_history, confirm_modify_collector, confirm_trade_collector,
     trade_book and traded.
+    
     Public methods: add_order_to_book(), order_history_to_h5(), trade_book_to_h5(),
     sip_to_h5() and report_top_of_book()
     '''
@@ -25,6 +29,7 @@ class Orderbook(object):
         order_history is a list of all incoming orders (dicts) in the order received
         _bid_book_prices and _ask_book_prices are linked (sorted) lists of bid and ask prices
         which serve as pointers to:
+        
         _bid_book and _ask_book: dicts of current order book state and OrderedDicts of orders
         the OrderedDicts maintain time priority for each order at a given price.
         confirm_modify_collector and confirm_trade_collector are lists that carry information (dicts) from the
