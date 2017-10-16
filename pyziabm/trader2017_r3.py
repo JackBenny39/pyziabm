@@ -207,11 +207,35 @@ class Provider(ZITrader):
         # make pricing explicit for now. Logic scales for other mpi.
         plug = np.int(lambda_t*np.log(np.random.rand()))
         if side == 'bid':
+            #price = np.int(5*np.floor((inside_price-1-plug)/5))
+            price = inside_price-1-plug
+        else:
+            #price = np.int(5*np.ceil((inside_price+1+plug)/5))
+            price = inside_price+1+plug
+        return price
+    
+
+class Provider5(Provider):
+    '''
+    Provider5 generates quotes (dicts) based on make probability.
+    
+    Subclass of Provider
+    '''
+
+    def __init__(self, name, maxq, mpi, delta):
+        '''Provider has own mpi and delta; a local_book to track outstanding orders and a 
+        cancel_collector to convey cancel messages to the exchange.
+        '''
+        Provider.__init__(self, name, maxq, mpi, delta)
+
+    def _choose_price_from_exp(self, side, inside_price, lambda_t):
+        '''Prices chosen from an exponential distribution'''
+        # make pricing explicit for now. Logic scales for other mpi.
+        plug = np.int(lambda_t*np.log(np.random.rand()))
+        if side == 'bid':
             price = np.int(5*np.floor((inside_price-1-plug)/5))
-            #price = inside_price-1-plug
         else:
             price = np.int(5*np.ceil((inside_price+1+plug)/5))
-            #price = inside_price+1+plug
         return price
     
     
@@ -236,8 +260,6 @@ class MarketMaker(Provider):
         self._position = 0
         self._cash_flow = 0
         self.cash_flow_collector = []
-        self._p5ask = [1/20, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/30]
-        self._p5bid = [1/30, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/20]
                       
     def __repr__(self):
         return 'Trader({0}, {1}, {2}, {3})'.format(self._trader_id, self._max_quantity, self.trader_type, self._num_quotes)
@@ -262,7 +284,46 @@ class MarketMaker(Provider):
                                          'position': self._position})
             
     def process_signal(self, time, qsignal, q_provider):
-        '''MM chooses prices from a grid determined by the best prevailing prices.
+        '''
+        MM chooses prices from a grid determined by the best prevailing prices.
+        MM never joins the best price if it has size=1.
+        ''' 
+        # make pricing explicit for now. Logic scales for other mpi and quote ranges.
+        self.quote_collector.clear()
+        if random.uniform(0,1) < q_provider:
+            max_bid_price = qsignal['best_bid'] if qsignal['bid_size'] > 1 else qsignal['best_bid']-self._mpi
+            prices = np.random.choice(range(max_bid_price-self._quote_range+1, max_bid_price+1, self._mpi), size=self._num_quotes)
+            side = 'buy'
+        else:
+            min_ask_price = qsignal['best_ask'] if qsignal['ask_size'] > 1 else qsignal['best_ask']+self._mpi
+            prices = np.random.choice(range(min_ask_price, min_ask_price+self._quote_range, self._mpi), size=self._num_quotes)
+            side = 'sell'
+        for price in prices:
+            q = self._make_add_quote(time, self._max_quantity, side, price)
+            self.local_book[q['order_id']] = q
+            self.quote_collector.append(q)
+            
+            
+class MarketMaker5(MarketMaker):
+    '''
+    MarketMaker5 generates a series of quotes near the inside (dicts) based on make probability.
+    
+    Subclass of MarketMaker
+    Public methods: process_signal 
+    '''
+    
+    def __init__(self, name, maxq, mpi, delta, num_quotes, quote_range):
+        '''
+        _num_quotes and _quote_range determine the depth of MM quoting;
+        _position and _cashflow are stored MM metrics
+        '''
+        MarketMaker.__init__(self, name, maxq, mpi, delta, num_quotes, quote_range)
+        self._p5ask = [1/20, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/30]
+        self._p5bid = [1/30, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/12, 1/20]
+               
+    def process_signal(self, time, qsignal, q_provider):
+        '''
+        MM chooses prices from a grid determined by the best prevailing prices.
         MM never joins the best price if it has size=1.
         ''' 
         # make pricing explicit for now. Logic scales for other mpi and quote ranges.
@@ -270,12 +331,10 @@ class MarketMaker(Provider):
         if random.uniform(0,1) < q_provider:
             max_bid_price = qsignal['best_bid'] if qsignal['bid_size'] > 1 else qsignal['best_bid']-self._mpi
             prices = np.random.choice(range(max_bid_price-self._quote_range, max_bid_price+1, self._mpi), size=self._num_quotes, p=self._p5bid)
-            #prices = np.random.choice(range(max_bid_price-self._quote_range+1, max_bid_price+1, self._mpi), size=self._num_quotes)
             side = 'buy'
         else:
             min_ask_price = qsignal['best_ask'] if qsignal['ask_size'] > 1 else qsignal['best_ask']+self._mpi
             prices = np.random.choice(range(min_ask_price, min_ask_price+self._quote_range+1, self._mpi), size=self._num_quotes, p=self._p5ask)
-            #prices = np.random.choice(range(min_ask_price, min_ask_price+self._quote_range, self._mpi), size=self._num_quotes)
             side = 'sell'
         for price in prices:
             q = self._make_add_quote(time, self._max_quantity, side, price)

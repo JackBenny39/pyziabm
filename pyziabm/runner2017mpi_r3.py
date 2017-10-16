@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from pyziabm.orderbook3 import Orderbook
-from pyziabm.trader2017_r3 import Provider, Taker, MarketMaker, PennyJumper
+from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper
 
 
 class Runner(object):
@@ -56,7 +56,10 @@ class Runner(object):
         provider_size = np.random.choice(actual_arr, num_providers)
         t_delta_p = np.floor(np.random.exponential(1/alpha, num_providers)+1)*provider_size
         providers_list = ['p%i' % i for i in range(num_providers)]
-        providers = np.array([Provider(p,i,mpi,delta) for p,i in zip(providers_list,provider_size)])
+        if mpi==1:
+            providers = np.array([Provider(p,i,mpi,delta) for p,i in zip(providers_list,provider_size)])
+        else:
+            providers = np.array([Provider5(p,i,mpi,delta) for p,i in zip(providers_list,provider_size)])
         return t_delta_p, providers
     
     def make_marketmaker_array(self, maxq, num_mms, mm_quotes, mm_quote_range, mm_delta, mpi):
@@ -65,7 +68,10 @@ class Runner(object):
         provider_size = np.random.choice(actual_arr, num_mms)
         t_delta_m = maxq
         marketmakers_list = ['m%i' % i for i in range(num_mms)]
-        marketmakers = np.array([MarketMaker(p,i,mpi,mm_delta,mm_quotes,mm_quote_range) for p,i in zip(marketmakers_list,provider_size)])
+        if mpi==1:
+            marketmakers = np.array([MarketMaker(p,i,mpi,mm_delta,mm_quotes,mm_quote_range) for p,i in zip(marketmakers_list,provider_size)])
+        else:
+            marketmakers = np.array([MarketMaker5(p,i,mpi,mm_delta,mm_quotes,mm_quote_range) for p,i in zip(marketmakers_list,provider_size)])
         return t_delta_m, marketmakers
         
     def make_pennyjumper(self, mpi):
@@ -239,11 +245,11 @@ if __name__ == '__main__':
 #    run_steps=100000
 #    mpi=1
 #    h5filename='test.h5'  
-    h5_root = 'mm1_mpi1test5'
+    h5_root = 'mm1_mpi1test999'
     alpha_pj = 0.05
-    pj = True
+    pj = False
 
-    h5dir = 'C:\\path\\to\\h5\\directory\\'
+    h5dir = 'C:\\Users\\user\\Documents\\Agent-Based Models\\h5 files\\TempTests\\'
     h5_file = '%s%s.h5' % (h5dir, h5_root)
     
     if pj:
