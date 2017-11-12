@@ -7,7 +7,9 @@ If you just want to install and run a quick simulation:
 conda install -c dennycrane pyziabm
 
 In A Jupyter Notebook or iPython command line:
+
 from pyziabm.runner2017mpi_r4 import Runner
+
 Runner() 
 
 will call the simulation with the defaults. To change the defaults and run several in a loop see the runwrapper files detailed below.
