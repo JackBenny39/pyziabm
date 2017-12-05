@@ -21,6 +21,7 @@
     <p>You can download or fork the <a href="https://github.com/JackBenny39/pyziabm">code</a> and run it yourself.</p>
     <p>Or, you can use one of the <a href="https://github.com/JackBenny39/pyziabm">conda packages</a> by downloading and installing or by: conda install -c dennycrane pyziabm. For now, there are Python3.6 versions in Windows, Unix and Mac.</p>
   </div>
+  
   <div class="Layout">
     <h2>Code Layout</h2>
     <p>There are six files:</p>
@@ -37,10 +38,35 @@
     <ul>
       <li>Contains the Orderbook class.</li>
       <li>Instances track, process and match orders.</li>
-      <li>Imported by runner2017mpi_r3.py or runner2017mpi_r4.py</li>
+      <li>Imported by runner2017mpi_r3.py or runner2017mpi_r4.py.</li>
     </ul>
     
+    <h3>trader2017_r3.py</h3>
+    <ul>
+      <li>Contains the base ZITrader class and six subclasses: PennyJumper, PennyJumper5, Taker, Provider, MarketMaker, MarketMaker5.</li>
+      <li>Imported by runner2017mpi_r3.py or runner2017mpi_r4.py.</li>
+    </ul>
+
+    <h3>runner2017mpi_r3.py and runner2017mpi_r3.py</h3>
+    <ul>
+      <li>Contains the Runner class.</li>
+      <li>Instances set up and run 1 simulation.</li>
+      <li>Note: the __init__() uses all keywords - these are the defaults. User can change them here or override them when instantiating in __main__.</li>
+      <li>Note: User should specify proper paths for saving output.</li>
+      <li>Imported by runwrapper2017mpi_r3.py.</li>
+    </ul>
     
+    <h3>runwrapper2017mpi_r3.py</h3>
+    <ul>
+      <li>Runs the simulations in a loop, does some summary output bookkeeping.</li>
+      <li>Note: User should specify proper paths for saving output.</li>
+    </ul>
+
+    <h3>runwrapper2017mpi_r3x.py</h3>
+    <ul>
+      <li>Unix executable version of runwrapper2017mpi_r3.py.</li>
+      <li>Note: User should specify proper paths for the python interpreter and saving output.</li>
+    </ul>
   </div>
   
 </body>
