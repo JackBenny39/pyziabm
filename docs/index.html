@@ -123,6 +123,10 @@
         return tob</code></pre>
     <h3>trader2017_r3.py</h3>
     <p>Traders can be modified to do anything you want. The only requirement is that the new Trader communicates with the Orderbook. In other words, the new Trader must be able to generate at least one of the two messages described above and handle the messages coming from the Orderbook.</p>
+    <h3>runner2017_r3.py and runner2017_r4</h3>
+    <p>The Runner class instantiates the agents, creates the Orderbook and runs the simulation in a loop. It also handles some of the results storage.</p>
+    <h3>runwrapper2017_r3.py and runwrapper2017_r3x</h3>
+    <p>The runwrapper modules define and create the output data sets needed for the paper. It also provides a loop for running multiple simulations in sequence. runwrapper2017_r3x accepts input arguments in an executable file - this facilitates running all of the groups of simulations simultaneously on a large server.</p>
   </div>
   
 </body>
