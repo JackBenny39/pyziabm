@@ -72,8 +72,8 @@
   <div class="Conda">
     <h2>Working With Conda</h2>
     <p>The easiest way to get started is to use IPython or a Jupyter Notebook:</p>
-    <code>>>>from pyziabm.runner2017mpi_r4 import Runner</code>
-    <code>>>>Runner()</code>
+    <p><code>>>>from pyziabm.runner2017mpi_r4 import Runner</code></p>
+    <p><code>>>>Runner()</code></p>
     <p>This will take a few minutes to run and will generate an hdf5 file named test.h5 in the working directory.</p>
     <p>The <a href="https://github.com/JackBenny39/pyziabm">code in GitHub</a> provides some example Jupyter Notebooks for working with the output data.</p>
     <p>The Runner instantiation takes all keyword arguments with defaults.</p>
@@ -84,6 +84,7 @@
                  mpi=5, h5filename='test.h5', pj=False, alpha_pj=0):</code></pre>
     <p>To change the imputs, pass them into the Runner call:</p>
     <code>>>>Runner(mpi=1, h5filename='test2.h5', pj=True, alpha_pj=001)</code>
+    <p>To run in a loop and collect output consistent with the paper, see the details for working with the runwrappers below.</p>
   </div>
   
 </body>
