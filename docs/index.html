@@ -111,7 +111,7 @@
         trader = order_id.partition('_')[0]
         self.confirm_modify_collector.append({'timestamp': timestamp, 'trader': trader, 'order_id': order_id, 
                                               'quantity': order_quantity, 'side': order_side})</code></pre>
-    <p>Much of the internal Orderbook bookeeping methods would have to be modified as well. As the official bookkeeper, the Orderbook is also responsible for providing post-event information (via the SIP - also a dict):</p>
+    <p>Much of the internal Orderbook bookkeeping methods would have to be modified as well. As the official bookkeeper, the Orderbook is also responsible for providing post-event information (via the SIP - also a dict):</p>
     <pre><code class="language-python">def report_top_of_book(self, now_time):
         '''Update the top-of-book prices and sizes'''
         best_bid_price = self._bid_book_prices[-1]
@@ -120,7 +120,9 @@
         best_ask_size = self._ask_book[best_ask_price]['size']
         tob = {'timestamp': now_time, 'best_bid': best_bid_price, 'best_ask': best_ask_price, 'bid_size': best_bid_size, 'ask_size': best_ask_size}
         self._sip_collector.append(tob)
-        return tob</code></pre>    
+        return tob</code></pre>
+    <h3>trader2017_r3.py</h3>
+    <p>Traders can be modified to do anything you want. The only requirement is that the new Trader communicates with the Orderbook. In other words, the new Trader must be able to generate at least one of the two messages described above and handle the messages coming from the Orderbook.</p>
   </div>
   
 </body>
