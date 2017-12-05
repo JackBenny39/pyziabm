@@ -1,0 +1,11 @@
+body {
+		font-family: 'Montserrat';
+}		
+		
+header {
+		height: 100px;
+		background-color: #1a18ce;
+		border-bottom: 2px #2aafea solid;	
+		padding: 10px;
+		margin-bottom: 0;
+}
