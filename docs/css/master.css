@@ -16,3 +16,10 @@ header h1 {
 		font-size: xx-large;
 		text-align: center;
 }
+
+header h3 {
+		margin: 10px;
+		color: white;
+		font-size: large;
+		text-align: center;
+}
