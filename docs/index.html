@@ -89,6 +89,17 @@
   
   <div class="Source">
     <h2>Working With Source</h2>
+    <h3>orderbook3.py</h3>
+    <p>In general, the Orderbook shouldn't be modified. However, adding additional functionality (like hidden orders) requires working with the Traders, too. Traders communicate with the Orderbook via add and cancel messages carried to the Orderbook via dicts:</p>
+    <pre><code class="language-python">def _make_add_quote(self, time, quantity, side, price):
+        '''Make one add quote (dict)'''
+        self._quote_sequence += 1
+        order_id = '%s_%d' % (self._trader_id, self._quote_sequence)
+        return {'order_id': order_id, 'timestamp': time, 'type': 'add', 'quantity': quantity, 
+                'side': side, 'price': price}</code></pre>
+    <pre><code class="language-python">def _make_cancel_quote(self, q, time):
+        return {'type': 'cancel', 'timestamp': time, 'order_id': q['order_id'], 'quantity': q['quantity'],
+                'side': q['side'], 'price': q['price']}</code></pre>
     
   </div>
   
