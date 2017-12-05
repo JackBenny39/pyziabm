@@ -3,6 +3,8 @@ Zero Intelligence Agent-Based Model of Modern Limit Order Book
 
 Charles Collver, PhD
 
+See the [Project Website](https://jackbenny39.github.io/pyziabm/) for more details.
+
 If you just want to install and run a quick simulation:
 conda install -c dennycrane pyziabm
 
