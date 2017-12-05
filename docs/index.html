@@ -100,7 +100,27 @@
     <pre><code class="language-python">def _make_cancel_quote(self, q, time):
         return {'type': 'cancel', 'timestamp': time, 'order_id': q['order_id'], 'quantity': q['quantity'],
                 'side': q['side'], 'price': q['price']}</code></pre>
-    
+    <p>The Orderbook communicates with Traders via confirm messages, also dicts:</p>
+    <pre><code class="language-python">def _confirm_trade(self, timestamp, order_side, order_quantity, order_id, order_price):
+        '''Add trade confirmation to confirm_trade_collector list.'''
+        trader = order_id.partition('_')[0]
+        self.confirm_trade_collector.append({'timestamp': timestamp, 'trader': trader, 'order_id': order_id, 
+                                             'quantity': order_quantity, 'side': order_side, 'price': order_price})</code></pre>
+    <pre><code class="language-python">def _confirm_modify(self, timestamp, order_side, order_quantity, order_id):
+        '''Add modify confirmation to confirm_modify_collector list.'''
+        trader = order_id.partition('_')[0]
+        self.confirm_modify_collector.append({'timestamp': timestamp, 'trader': trader, 'order_id': order_id, 
+                                              'quantity': order_quantity, 'side': order_side})</code></pre>
+    <p>Much of the internal Orderbook bookeeping methods would have to be modified as well. As the official bookkeeper, the Orderbook is also responsible for providing post-event information (via the SIP - also a dict):</p>
+    <pre><code class="language-python">def report_top_of_book(self, now_time):
+        '''Update the top-of-book prices and sizes'''
+        best_bid_price = self._bid_book_prices[-1]
+        best_bid_size = self._bid_book[best_bid_price]['size']   
+        best_ask_price = self._ask_book_prices[0]
+        best_ask_size = self._ask_book[best_ask_price]['size']
+        tob = {'timestamp': now_time, 'best_bid': best_bid_price, 'best_ask': best_ask_price, 'bid_size': best_bid_size, 'ask_size': best_ask_size}
+        self._sip_collector.append(tob)
+        return tob</code></pre>    
   </div>
   
 </body>
