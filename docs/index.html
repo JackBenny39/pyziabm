@@ -74,9 +74,14 @@
     <p>The easiest way to get started is to use IPython or a Jupyter Notebook:</p>
     <p>>>>from pyziabm.runner2017mpi_r4 import Runner</p>
     <p>>>>Runner()</p>
-    <p>This will take a few minutes to run and will generate an hdf5 file named test.h5 in the working directory</p>
+    <p>This will take a few minutes to run and will generate an hdf5 file named test.h5 in the working directory.</p>
     <p>The <a href="https://github.com/JackBenny39/pyziabm">code in GitHub</a> provides some example Jupyter Notebooks for working with the output data.</p>
-    
+    <p>The Runner instantiation takes all keyword arguments with defaults.</p>
+    <pre><code class="language-python">class Runner(object):
+    def __init__(self, prime1=20, num_mms=1, mm_maxq=1, mm_quotes=12, mm_quote_range=60, mm_delta=0.025, 
+                 num_takers=50, taker_maxq=1, num_providers=38, provider_maxq=1, q_provide=0.5,
+                 alpha=0.0375, mu=0.001, delta=0.025, lambda0=100, wn=0.001, c_lambda=1.0, run_steps=100000,
+                 mpi=5, h5filename='test.h5', pj=False, alpha_pj=0):</code></pre>
   </div>
   
 </body>
