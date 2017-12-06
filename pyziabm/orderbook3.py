@@ -14,7 +14,7 @@ class Orderbook(object):
     history of the book.
     Public attributes: order_history, confirm_modify_collector, confirm_trade_collector,
     trade_book and traded.
-    Public methods: add_order_to_book(), order_history_to_h5(), trade_book_to_h5(),
+    Public methods: add_order_to_book(), process_order(), order_history_to_h5(), trade_book_to_h5(),
     sip_to_h5() and report_top_of_book()
     '''
     
