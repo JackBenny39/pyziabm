@@ -1,0 +1,31 @@
+body {
+		font-family: 'Montserrat';
+}		
+		
+header {
+		height: 100px;
+		background-color: #1a18ce;
+		border-bottom: 2px #2aafea solid;	
+		padding: 10px;
+		margin-bottom: 0;
+}
+
+header h1 {
+		margin: 0px;
+		color: white;
+		font-size: xx-large;
+		text-align: center;
+}
+
+header h3 {
+		margin: 10px;
+		color: white;
+		font-size: large;
+		text-align: center;
+}
+
+h2 {
+		color: black;
+		font-size: x-large;
+		text-align: left;
+}

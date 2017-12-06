@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang=en>
+
+<head>
+  <meta charset=utf-8>
+  <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700,400italic' rel='stylesheet' type='text/css'>
+  <link rel='stylesheet' type='text/css' href='css/master.css'>
+  
+  <title>pyziabm</title>
+</head>
+  
+<body>
+  <header>
+    <h1>pyziabm</h1>
+    <h3>A Zero-Intelligence Agent-Based Model of a Modern Limit Order Market</h3>
+  </header>
+  
+  <div class="Overview">
+    <h2>Overview</h2>
+    <p>The code in this GitHub repository was used to generate the results in "Increasing the minimum price increment boosts market-maker profitability" by Charles Collver.</p>
+    <p>You can download or fork the <a href="https://github.com/JackBenny39/pyziabm">code</a> and run it yourself.</p>
+    <p>Or, you can use one of the <a href="https://github.com/JackBenny39/pyziabm">conda packages</a> by downloading and installing or by: conda install -c dennycrane pyziabm. For now, there are Python3.6 versions in Windows, Unix and Mac.</p>
+  </div>
+  
+  <div class="Layout">
+    <h2>Code Layout</h2>
+    <p>There are six files:</p>
+    <ol>
+      <li>orderbook3.py</li>
+      <li>trader2017_r3.py</li>
+      <li>runner2017mpi_r3.py</li>
+      <li>runner2017mpi_r4.py</li>
+      <li>runwrapper2017mpi_r3.py</li>
+      <li>runwrapper2017mpi_r3x.py</li>
+    </ol>
+      
+    <h3>orderbook3.py</h3>
+    <ul>
+      <li>Contains the Orderbook class.</li>
+      <li>Instances track, process and match orders.</li>
+      <li>Imported by runner2017mpi_r3.py or runner2017mpi_r4.py.</li>
+    </ul>
+    
+    <h3>trader2017_r3.py</h3>
+    <ul>
+      <li>Contains the base ZITrader class and six subclasses: PennyJumper, PennyJumper5, Taker, Provider, MarketMaker, MarketMaker5.</li>
+      <li>Imported by runner2017mpi_r3.py or runner2017mpi_r4.py.</li>
+    </ul>
+
+    <h3>runner2017mpi_r3.py and runner2017mpi_r4.py</h3>
+    <ul>
+      <li>Contains the Runner class.</li>
+      <li>Instances set up and run 1 simulation.</li>
+      <li>Note: the __init__() uses all keywords - these are the defaults. User can change them here or override them when instantiating in __main__.</li>
+      <li>Note: User should specify proper paths for saving output.</li>
+      <li>Imported by runwrapper2017mpi_r3.py.</li>
+    </ul>
+    
+    <h3>runwrapper2017mpi_r3.py</h3>
+    <ul>
+      <li>Runs the simulations in a loop, does some summary output bookkeeping.</li>
+      <li>Note: User should specify proper paths for saving output.</li>
+    </ul>
+
+    <h3>runwrapper2017mpi_r3x.py</h3>
+    <ul>
+      <li>Unix executable version of runwrapper2017mpi_r3.py.</li>
+      <li>Note: User should specify proper paths for the python interpreter and saving output.</li>
+    </ul>
+  </div>
+  
+  <div class="Conda">
+    <h2>Working With Conda</h2>
+    <p>The easiest way to get started is to use IPython or a Jupyter Notebook:</p>
+    <p><code>>>>from pyziabm.runner2017mpi_r4 import Runner</code></p>
+    <p><code>>>>Runner()</code></p>
+    <p>This will take a few minutes to run and will generate an hdf5 file named test.h5 in the working directory.</p>
+    <p>The <a href="https://github.com/JackBenny39/pyziabm">code in GitHub</a> provides some example Jupyter Notebooks for working with the output data.</p>
+    <p>The Runner instantiation takes all keyword arguments with defaults.</p>
+    <pre><code class="language-python">class Runner(object):
+    def __init__(self, prime1=20, num_mms=1, mm_maxq=1, mm_quotes=12, mm_quote_range=60, mm_delta=0.025, 
+                 num_takers=50, taker_maxq=1, num_providers=38, provider_maxq=1, q_provide=0.5,
+                 alpha=0.0375, mu=0.001, delta=0.025, lambda0=100, wn=0.001, c_lambda=1.0, run_steps=100000,
+                 mpi=5, h5filename='test.h5', pj=False, alpha_pj=0):</code></pre>
+    <p>To change the inputs, pass them into the Runner call:</p>
+    <code>>>>Runner(mpi=1, h5filename='test2.h5', pj=True, alpha_pj=0.01)</code>
+    <p>To run in a loop and collect output consistent with the paper, see the details for working with the runwrappers below.</p>
+  </div>
+  
+  <div class="Source">
+    <h2>Working With Source</h2>
+    <h3>orderbook3.py</h3>
+    <p>In general, the Orderbook shouldn't be modified. However, adding additional functionality (like hidden orders) requires working with the Traders, too. Traders communicate with the Orderbook via add and cancel messages carried to the Orderbook via dicts:</p>
+    <pre><code class="language-python">def _make_add_quote(self, time, quantity, side, price):
+        '''Make one add quote (dict)'''
+        self._quote_sequence += 1
+        order_id = '%s_%d' % (self._trader_id, self._quote_sequence)
+        return {'order_id': order_id, 'timestamp': time, 'type': 'add', 'quantity': quantity, 
+                'side': side, 'price': price}</code></pre>
+    <pre><code class="language-python">def _make_cancel_quote(self, q, time):
+        return {'type': 'cancel', 'timestamp': time, 'order_id': q['order_id'], 'quantity': q['quantity'],
+                'side': q['side'], 'price': q['price']}</code></pre>
+    <p>The Orderbook communicates with Traders via confirm messages, also dicts:</p>
+    <pre><code class="language-python">def _confirm_trade(self, timestamp, order_side, order_quantity, order_id, order_price):
+        '''Add trade confirmation to confirm_trade_collector list.'''
+        trader = order_id.partition('_')[0]
+        self.confirm_trade_collector.append({'timestamp': timestamp, 'trader': trader, 'order_id': order_id, 
+                                             'quantity': order_quantity, 'side': order_side, 'price': order_price})</code></pre>
+    <pre><code class="language-python">def _confirm_modify(self, timestamp, order_side, order_quantity, order_id):
+        '''Add modify confirmation to confirm_modify_collector list.'''
+        trader = order_id.partition('_')[0]
+        self.confirm_modify_collector.append({'timestamp': timestamp, 'trader': trader, 'order_id': order_id, 
+                                              'quantity': order_quantity, 'side': order_side})</code></pre>
+    <p>Much of the internal Orderbook bookkeeping methods would have to be modified as well. As the official bookkeeper, the Orderbook is also responsible for providing post-event information (via the SIP - also a dict):</p>
+    <pre><code class="language-python">def report_top_of_book(self, now_time):
+        '''Update the top-of-book prices and sizes'''
+        best_bid_price = self._bid_book_prices[-1]
+        best_bid_size = self._bid_book[best_bid_price]['size']   
+        best_ask_price = self._ask_book_prices[0]
+        best_ask_size = self._ask_book[best_ask_price]['size']
+        tob = {'timestamp': now_time, 'best_bid': best_bid_price, 'best_ask': best_ask_price, 'bid_size': best_bid_size, 'ask_size': best_ask_size}
+        self._sip_collector.append(tob)
+        return tob</code></pre>
+    <h3>trader2017_r3.py</h3>
+    <p>Traders can be modified to do anything you want. The only requirement is that the new Trader communicates with the Orderbook. In other words, the new Trader must be able to generate at least one of the two messages described above and handle the messages coming from the Orderbook.</p>
+    <h3>runner2017_r3.py and runner2017_r4</h3>
+    <p>The Runner class instantiates the agents, creates the Orderbook and runs the simulation in a loop. It also handles some of the results storage.</p>
+    <h3>runwrapper2017_r3.py and runwrapper2017_r3x</h3>
+    <p>The runwrapper modules define and create the output data sets needed for the paper. It also provides a loop for running multiple simulations in sequence. runwrapper2017_r3x accepts input arguments in an executable file - this facilitates running all of the groups of simulations simultaneously on a large server.</p>
+  </div>
+  
+</body>
