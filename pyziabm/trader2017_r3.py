@@ -141,6 +141,35 @@ class Taker(ZITrader):
         self.quote_collector.append(q)
         
         
+class NoiseTrader(ZITrader):
+    '''
+    NoiseTrader crosses the spread when the spread is below average.
+    
+    Subclass Of Taker
+    '''
+    
+    def __init__(self, name, maxq):
+        ZITrader.__init__(self, name, maxq)
+        self.trader_type = 'NoiseTrader'
+        
+    def __repr__(self):
+        return 'Trader({0}, {1}, {2})'.format(self._trader_id, self._max_quantity, self.trader_type)
+    
+    def process_signal(self, time, q_taker, qsignal):
+        '''NoiseTrader buys or sells with 50% probability, but crosses the spread
+        only if the spread is lower than average
+        '''
+        self.quote_collector.clear()
+        # q_taker > 0.5 implies greater probability of a buy order
+        side = 'buy' if random.uniform(0,1) < q_taker else 'sell'
+        if side == 'buy':
+            price = 2000000 if qsignal['best_ask'] - qsignal['best_bid'] < qsignal['lag_spread'] else qsignal['best_bid']
+        else:
+            price = 0 if qsignal['best_ask'] - qsignal['best_bid'] < qsignal['lag_spread'] else qsignal['best_ask']
+        q = self._make_add_quote(time, self._max_quantity, side, price)
+        self.quote_collector.append(q)
+        
+        
 class Provider(ZITrader):
     '''
     Provider generates quotes (dicts) based on make probability.
@@ -179,7 +208,8 @@ class Provider(ZITrader):
             self.local_book[confirm['order_id']]['quantity'] -= confirm['quantity']
             
     def bulk_cancel(self, time):
-        '''bulk_cancel cancels _delta percent of outstanding orders'''
+        '''bulk_cancel cancels _delta percent of outstanding orders
+           enumerate is more pythonic, but slower and less amenable to cython'''
         self.cancel_collector.clear()
         lob = len(self.local_book)
         if lob > 0:
@@ -188,6 +218,9 @@ class Provider(ZITrader):
             for idx in range(lob):
                 if orders_to_delete[idx] < self._delta:
                     self.cancel_collector.append(self._make_cancel_quote(self.local_book.get(order_keys[idx]), time))
+            #for idx, randnum in enumerate(orders_to_delete):
+                #if randnum < self._delta:
+                    #self.cancel_collector.append(self._make_cancel_quote(self.local_book.get(order_keys[idx]), time))
 
     def process_signal(self, time, qsignal, q_provider, lambda_t):
         '''Provider buys or sells with probability related to q_provide'''

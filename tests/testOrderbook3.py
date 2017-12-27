@@ -21,7 +21,9 @@ class TestOrderbook(unittest.TestCase):
         '''
         setUp creates the Orderbook instance and a set of orders
         '''
-        self.ex1 = Orderbook()
+        self.ex1 = Orderbook(5)
+        self.q0_buy = {'order_id': 't1_0', 'timestamp': 1, 'type': 'add', 'quantity': 1, 'side': 'buy',
+                       'price': 50}
         self.q1_buy = {'order_id': 't1_1', 'timestamp': 2, 'type': 'add', 'quantity': 1, 'side': 'buy',
                        'price': 50}
         self.q2_buy = {'order_id': 't1_2', 'timestamp': 3, 'type': 'add', 'quantity': 1, 'side': 'buy',
@@ -30,6 +32,12 @@ class TestOrderbook(unittest.TestCase):
                        'price': 49}
         self.q4_buy = {'order_id': 't11_1', 'timestamp': 5, 'type': 'add', 'quantity': 3, 'side': 'buy',
                        'price': 47}
+        self.q5_buy = {'order_id': 't12_1', 'timestamp': 6, 'type': 'add', 'quantity': 3, 'side': 'buy',
+                       'price': 47}
+        self.q6_buy = {'order_id': 't13_1', 'timestamp': 7, 'type': 'add', 'quantity': 3, 'side': 'buy',
+                       'price': 47}
+        self.q0_sell = {'order_id': 't1_5', 'timestamp': 1, 'type': 'add', 'quantity': 1, 'side': 'sell',
+                        'price': 52}
         self.q1_sell = {'order_id': 't1_3', 'timestamp': 2, 'type': 'add', 'quantity': 1, 'side': 'sell',
                         'price': 52}
         self.q2_sell = {'order_id': 't1_4', 'timestamp': 3, 'type': 'add', 'quantity': 1, 'side': 'sell',
@@ -37,6 +45,10 @@ class TestOrderbook(unittest.TestCase):
         self.q3_sell = {'order_id': 't10_2', 'timestamp': 4, 'type': 'add', 'quantity': 3, 'side': 'sell',
                         'price': 53}
         self.q4_sell = {'order_id': 't11_2', 'timestamp': 5, 'type': 'add', 'quantity': 3, 'side': 'sell',
+                        'price': 55}
+        self.q5_sell = {'order_id': 't12_2', 'timestamp': 6, 'type': 'add', 'quantity': 3, 'side': 'sell',
+                        'price': 53}
+        self.q6_sell = {'order_id': 't13_2', 'timestamp': 7, 'type': 'add', 'quantity': 3, 'side': 'sell',
                         'price': 55}
             
     def test_add_order_to_history(self):
@@ -465,16 +477,47 @@ class TestOrderbook(unittest.TestCase):
         
     def test_report_top_of_book(self):
         '''
-        At setup(), top of book has 2 to sell at 52 and 2 to buy at 50
-        at time = 3
+        Testing for computing of lagged averages
         '''
-        self.ex1.add_order_to_book(self.q1_buy)
-        self.ex1.add_order_to_book(self.q2_buy)
-        self.ex1.add_order_to_book(self.q1_sell)
-        self.ex1.add_order_to_book(self.q2_sell)
-        tob_check = {'timestamp': 5, 'best_bid': 50, 'best_ask': 52, 'bid_size': 2, 'ask_size': 2}
-        self.ex1.report_top_of_book(5)
-        self.assertDictEqual(self.ex1._sip_collector[0], tob_check)
+        self.q0_buy = {'order_id': 't1_0', 'timestamp': 1, 'type': 'add', 'quantity': 1, 'side': 'buy',
+                       'price': 50}
+        self.q1_buy = {'order_id': 't1_1', 'timestamp': 2, 'type': 'add', 'quantity': 1, 'side': 'buy',
+                       'price': 50}
+        self.q2_buy = {'order_id': 't1_2', 'timestamp': 3, 'type': 'add', 'quantity': 1, 'side': 'buy',
+                       'price': 50}
+        self.q3_buy = {'order_id': 't10_1', 'timestamp': 4, 'type': 'add', 'quantity': 3, 'side': 'buy',
+                       'price': 49}
+        self.q4_buy = {'order_id': 't11_1', 'timestamp': 5, 'type': 'add', 'quantity': 3, 'side': 'buy',
+                       'price': 47}
+        self.q5_buy = {'order_id': 't12_1', 'timestamp': 6, 'type': 'add', 'quantity': 3, 'side': 'buy',
+                       'price': 47}
+        self.q6_buy = {'order_id': 't13_1', 'timestamp': 7, 'type': 'add', 'quantity': 3, 'side': 'buy',
+                       'price': 51}
+        self.q0_sell = {'order_id': 't1_5', 'timestamp': 1, 'type': 'add', 'quantity': 1, 'side': 'sell',
+                        'price': 52}
+        self.q1_sell = {'order_id': 't1_3', 'timestamp': 2, 'type': 'add', 'quantity': 1, 'side': 'sell',
+                        'price': 52}
+        self.q2_sell = {'order_id': 't1_4', 'timestamp': 3, 'type': 'add', 'quantity': 1, 'side': 'sell',
+                        'price': 52}
+        self.q3_sell = {'order_id': 't10_2', 'timestamp': 4, 'type': 'add', 'quantity': 3, 'side': 'sell',
+                        'price': 53}
+        self.q4_sell = {'order_id': 't11_2', 'timestamp': 5, 'type': 'add', 'quantity': 3, 'side': 'sell',
+                        'price': 55}
+        self.q5_sell = {'order_id': 't12_2', 'timestamp': 6, 'type': 'add', 'quantity': 3, 'side': 'sell',
+                        'price': 53}
+        self.q6_sell = {'order_id': 't13_2', 'timestamp': 7, 'type': 'add', 'quantity': 3, 'side': 'sell',
+                        'price': 55}
+        
+        for j, orders in enumerate(zip([self.q0_buy, self.q1_buy, self.q2_buy, self.q3_buy, self.q4_buy, self.q5_buy],
+                                       [self.q0_sell, self.q1_sell, self.q2_sell, self.q3_sell, self.q4_sell, self.q5_sell])):
+            buy, sell = orders
+            self.ex1.add_order_to_book(buy)
+            self.ex1.add_order_to_book(sell)
+            self.ex1.report_top_of_book(j+1)
+        tob_check_pre = {'timestamp': 6, 'best_bid': 50, 'best_ask': 52, 'bid_size': 3, 'ask_size': 3, 'lag_spread': 2.0,
+                        'lag_bid_depth': 2.4, 'lag_ask_depth': 2.4}
+        self.assertDictEqual(self.ex1._sip_collector[-1], tob_check_pre)
+        #print(self.ex1._sip_collector[-1])
         
     def test_market_collapse(self):
         '''

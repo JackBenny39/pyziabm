@@ -2,7 +2,7 @@ import random
 import numpy as np
 import unittest
 
-from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper
+from pyziabm.trader2017_r3 import Provider, Provider5, Taker, NoiseTrader, MarketMaker, MarketMaker5, PennyJumper
 
 
 class TestTrader(unittest.TestCase):
@@ -21,6 +21,7 @@ class TestTrader(unittest.TestCase):
         self.p1 = Provider('p1', 1, 1, 0.05)
         self.p5 = Provider5('p5', 1, 5, 0.05)
         self.t1 = Taker('t1', 1)
+        self.n1 = NoiseTrader('n1', 1)
         self.m1 = MarketMaker('m1', 1, 1, 0.05, 12, 60)
         self.m5 = MarketMaker5('m5', 1, 5, 0.05, 12, 60)
         self.j1 = PennyJumper('j1', 1, 5)
@@ -82,6 +83,51 @@ class TestTrader(unittest.TestCase):
         self.assertEqual(len(self.t1.quote_collector), 1)
         self.assertEqual(self.t1.quote_collector[0]['side'], 'sell')
         self.assertEqual(self.t1.quote_collector[0]['price'], 0)
+        
+# NoiseTrader tests
+
+    def test_repr_NoiseTrader(self):
+        self.assertEqual('NoiseTrader: Trader(n1, 1, NoiseTrader)', 'NoiseTrader: {0}'.format(self.n1))
+        
+    def test_process_signal_NoiseTrader(self):
+        '''
+        Generates a quote object (dict) and appends to quote_collector
+        '''
+        low_ru_seed = 1
+        hi_ru_seed = 10
+        q_taker = 0.5
+        tob1 = {'best_bid': 99988, 'best_ask': 99994, 'bid_size': 10, 'ask_size': 10,
+                'lag_spread':4, 'lag_bid_depth': 10, 'lag_ask_depth': 10}
+        tob2 = {'best_bid': 99988, 'best_ask': 99994, 'bid_size': 10, 'ask_size': 10,
+                'lag_spread':10, 'lag_bid_depth': 10, 'lag_ask_depth': 10}
+        self.assertFalse(self.n1.quote_collector)
+        random.seed(low_ru_seed)
+        time_step = 1
+        # random.uniform < q_taker: buy; spread > avg spread: make
+        self.n1.process_signal(time_step, q_taker, tob1)
+        expected = {'order_id': 'n1_1', 'timestamp': 1, 'type': 'add', 'quantity': 1, 'side': 'buy', 'price': 99988}
+        self.assertDictEqual(expected, self.n1.quote_collector[0])
+
+        random.seed(low_ru_seed)
+        time_step = 2
+        # random.uniform < q_taker: buy; spread < avg spread: take
+        self.n1.process_signal(time_step, q_taker, tob2)
+        expected = {'order_id': 'n1_2', 'timestamp': 2, 'type': 'add', 'quantity': 1, 'side': 'buy', 'price': 2000000}
+        self.assertDictEqual(expected, self.n1.quote_collector[0])
+        
+        random.seed(hi_ru_seed)
+        time_step = 3
+        # random.uniform > q_taker: sell; spread > avg spread: make
+        self.n1.process_signal(time_step, q_taker, tob1)
+        expected = {'order_id': 'n1_3', 'timestamp': 3, 'type': 'add', 'quantity': 1, 'side': 'sell', 'price': 99994}
+        self.assertDictEqual(expected, self.n1.quote_collector[0])
+        
+        random.seed(hi_ru_seed)
+        time_step = 4
+        # random.uniform > q_taker: sell; spread < avg spread: take
+        self.n1.process_signal(time_step, q_taker, tob2)
+        expected = {'order_id': 'n1_4', 'timestamp': 4, 'type': 'add', 'quantity': 1, 'side': 'sell', 'price': 0}
+        self.assertDictEqual(expected, self.n1.quote_collector[0])
         
 # Provider tests  
 

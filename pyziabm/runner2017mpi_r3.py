@@ -226,6 +226,10 @@ if __name__ == '__main__':
     
     start = time.time()
     print(start) 
+    
+    random.seed(5)
+    np.random.seed(5)
+    
 #    num_mms=1
 #    mm_maxq=1
 #    mm_quotes=5
@@ -245,7 +249,7 @@ if __name__ == '__main__':
 #    run_steps=100000
 #    mpi=1
 #    h5filename='test.h5'  
-    h5_root = 'mm1_mpi1test999'
+    h5_root = 'test_without_enum'
     alpha_pj = 0.05
     pj = False
 
