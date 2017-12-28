@@ -20,7 +20,7 @@ class Runner(object):
         self.t_delta_p, self.provider_array = self.make_provider_array(provider_maxq, num_providers, delta, mpi, alpha)
         self.t_delta_m, self.marketmaker_array = self.make_marketmaker_array(mm_maxq, num_mms, mm_quotes, mm_quote_range, mm_delta, mpi)
         self.pennyjumper = self.make_pennyjumper(mpi)
-        self.exchange = Orderbook()
+        self.exchange = Orderbook(15)
         self.h5filename = h5filename
         self.q_take, self.lambda_t = self.make_q_take(wn, c_lambda)
         self.trader_dict = self.make_traders(num_takers, num_providers, num_mms)

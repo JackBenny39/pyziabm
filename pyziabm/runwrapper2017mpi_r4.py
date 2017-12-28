@@ -3,7 +3,7 @@ import time
 import numpy as np
 import pandas as pd
 
-from pyziabm.runner2017mpi_r3 import Runner
+from pyziabm.runner2017mpi_r4 import Runner
 
 def participation_to_list(h5in, outlist):
     trade_df = pd.read_hdf(h5in, 'trades')
@@ -198,15 +198,6 @@ for j in range(1,end):
         market1 = Runner(alpha_pj=alpha_pj, h5filename=h5_file)
     else:
         market1 = Runner(c_lambda=c_lambda, mpi=mpi, h5filename=h5_file)
-    market1.seed_orderbook()
-    market1.make_setup(20)
-    if pj:
-        market1.run_mcsPJ(20)
-    else:
-        market1.run_mcs(20)
-    market1.exchange.trade_book_to_h5(market1.h5filename)
-    market1.qtake_to_h5()
-    market1.mm_profitability_to_h5()
     
     participation_to_list(market1.h5filename, participation_collector)
     position_to_list(market1.h5filename, position_collector)

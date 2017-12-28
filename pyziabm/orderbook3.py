@@ -1,4 +1,5 @@
 import bisect
+import numpy as np
 import pandas as pd
 from collections import OrderedDict
 
@@ -44,6 +45,7 @@ class Orderbook(object):
         #self.last_time = 0
         self._order_index = 0
         self._window = window
+        self._spreads = [0]
         self.traded = False
 
     def _add_order_to_history(self, order):
@@ -234,26 +236,14 @@ class Orderbook(object):
     
     def report_top_of_book(self, now_time):
         '''Update the top-of-book prices and sizes'''
-        if now_time > 1:
-            temp_df = pd.DataFrame(self._sip_collector)
-            temp_df = temp_df.assign(spread = temp_df.best_ask - temp_df.best_bid)
-        if now_time > self._window:
-            temp_df = temp_df[temp_df.timestamp >= (now_time - self._window)]
-            lagged_mean_spread = temp_df.spread.mean()
-            lagged_mean_bid_depth = temp_df.bid_size.mean()
-            lagged_mean_ask_depth = temp_df.ask_size.mean()
-        else:
-            lagged_mean_spread = 0
-            lagged_mean_bid_depth = 0
-            lagged_mean_ask_depth = 0
-    
+        lagged_mean_spread = np.mean(self._spreads[-self._window:])
         best_bid_price = self._bid_book_prices[-1]
         best_bid_size = self._bid_book[best_bid_price]['size']   
         best_ask_price = self._ask_book_prices[0]
         best_ask_size = self._ask_book[best_ask_price]['size']
-        
+        self._spreads.append(best_ask_price - best_bid_price)
         tob = {'timestamp': now_time, 'best_bid': best_bid_price, 'best_ask': best_ask_price, 'bid_size': best_bid_size, 'ask_size': best_ask_size,
-               'lag_spread': lagged_mean_spread, 'lag_bid_depth': lagged_mean_bid_depth, 'lag_ask_depth': lagged_mean_ask_depth}
+               'lag_spread': lagged_mean_spread}
         self._sip_collector.append(tob)
         return tob
     

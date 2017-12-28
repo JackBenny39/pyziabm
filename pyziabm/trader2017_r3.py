@@ -155,6 +155,9 @@ class NoiseTrader(ZITrader):
     def __repr__(self):
         return 'Trader({0}, {1}, {2})'.format(self._trader_id, self._max_quantity, self.trader_type)
     
+    def confirm_trade_local(self, confirm):
+        pass
+    
     def process_signal(self, time, q_taker, qsignal):
         '''NoiseTrader buys or sells with 50% probability, but crosses the spread
         only if the spread is lower than average

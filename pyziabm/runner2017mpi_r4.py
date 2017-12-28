@@ -1,28 +1,30 @@
 import random
+import time
 import numpy as np
 import pandas as pd
 
 from pyziabm.orderbook3 import Orderbook
-from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper
+from pyziabm.trader2017_r3 import Provider, Provider5, Taker, NoiseTrader, MarketMaker, MarketMaker5, PennyJumper
 
 
 class Runner(object):
     def __init__(self, prime1=20, num_mms=1, mm_maxq=1, mm_quotes=12, mm_quote_range=60, mm_delta=0.025, 
-                 num_takers=50, taker_maxq=1, num_providers=38, provider_maxq=1, q_provide=0.5,
-                 alpha=0.0375, mu=0.001, delta=0.025, lambda0=100, wn=0.001, c_lambda=1.0, run_steps=100000,
-                 mpi=5, h5filename='test.h5', pj=False, alpha_pj=0):
+                 num_takers=50, taker_maxq=1, num_nts=50, nt_maxq=1, num_providers=38, provider_maxq=1,
+                 q_provide=0.5, alpha=0.0375, mu=0.001, mu_nt=0.001, delta=0.025, lambda0=100, wn=0.001, 
+                 c_lambda=1.0, run_steps=100000, mpi=5, h5filename='test.h5', pj=False, alpha_pj=0):
         self.alpha_pj = alpha_pj
         self.q_provide = q_provide
         self.lambda0 = lambda0
         self.run_steps = run_steps+1
         self.h5filename = h5filename
         self.t_delta_t, self.taker_array = self.make_taker_array(taker_maxq, num_takers, mu)
+        self.t_delta_n, self.noisetrader_array = self.make_noisetrader_array(nt_maxq, num_nts, mu_nt)
         self.t_delta_p, self.provider_array = self.make_provider_array(provider_maxq, num_providers, delta, mpi, alpha)
         self.t_delta_m, self.marketmaker_array = self.make_marketmaker_array(mm_maxq, num_mms, mm_quotes, mm_quote_range, mm_delta, mpi)
         self.pennyjumper = self.make_pennyjumper(mpi)
-        self.exchange = Orderbook()
+        self.exchange = Orderbook(15)
         self.q_take, self.lambda_t = self.make_q_take(wn, c_lambda)
-        self.trader_dict = self.make_traders(num_takers, num_providers, num_mms)
+        self.trader_dict = self.make_traders(num_takers, num_providers, num_mms, num_nts)
         self.seed_orderbook()
         self.make_setup(prime1)
         if pj:
@@ -57,6 +59,15 @@ class Runner(object):
         takers = np.array([Taker(t,i) for t,i in zip(takers_list,taker_size)])
         return t_delta_t, takers
     
+    def make_noisetrader_array(self, maxq, num_nts, mu):
+        default_arr = np.array([1, 5, 10, 25, 50])
+        actual_arr = default_arr[default_arr<=maxq]
+        nt_size = np.random.choice(actual_arr, num_nts)
+        t_delta_n = np.floor(np.random.exponential(1/mu, num_nts)+1)*nt_size
+        nt_list = ['n%i' % i for i in range(num_nts)]
+        noisetraders = np.array([NoiseTrader(t,i) for t,i in zip(nt_list,nt_size)])
+        return t_delta_n, noisetraders
+    
     def make_provider_array(self, maxq, num_providers, delta, mpi, alpha):
         default_arr = np.array([1, 5, 10, 25, 50])
         actual_arr = default_arr[default_arr<=maxq]
@@ -84,8 +95,10 @@ class Runner(object):
     def make_pennyjumper(self, mpi):
         return PennyJumper('j0', 1, mpi)
     
-    def make_traders(self, num_takers, num_providers, num_mms):
+    def make_traders(self, num_takers, num_providers, num_mms, num_nts):
         takers_dict = dict(zip(['t%i' % i for i in range(num_takers)], list(self.taker_array)))
+        noisetraders_dict = dict(zip(['n%i' % i for i in range(num_nts)], list(self.noisetrader_array)))
+        takers_dict.update(noisetraders_dict)
         providers_dict = dict(zip(['p%i' % i for i in range(num_providers)], list(self.provider_array)))
         takers_dict.update(providers_dict)
         marketmakers_dict = dict(zip(['m%i' % i for i in range(num_mms)], list(self.marketmaker_array)))
@@ -103,10 +116,12 @@ class Runner(object):
         providers_mask = np.remainder(step, self.t_delta_p)==0
         takers_mask = np.remainder(step, self.t_delta_t)==0
         marketmakers_mask = np.remainder(step, self.t_delta_m)==0
+        noisetraders_mask = np.remainder(step, self.t_delta_n)==0
         providers = np.vstack((self.provider_array, providers_mask)).T
         takers = np.vstack((self.taker_array, takers_mask)).T
         marketmakers = np.vstack((self.marketmaker_array, marketmakers_mask)).T
-        traders = np.vstack((providers, marketmakers, takers[takers_mask]))
+        noisetraders = np.vstack((self.noisetrader_array, noisetraders_mask)).T
+        traders = np.vstack((providers, marketmakers, takers[takers_mask], noisetraders[noisetraders_mask]))
         np.random.shuffle(traders)
         return traders
     
@@ -169,6 +184,14 @@ class Runner(object):
                             if self.exchange.confirm_modify_collector: # <---- Check permission versus forgiveness here and elsewhere - move to methods?
                                 row[0].confirm_cancel_local(self.exchange.confirm_modify_collector[0])
                         top_of_book = self.exchange.report_top_of_book(current_time)
+                elif row[0].trader_type == 'NoiseTrader':
+                    row[0].process_signal(current_time, self.q_take[current_time], top_of_book)
+                    self.exchange.process_order(row[0].quote_collector[-1])
+                    if self.exchange.traded: # <---- Check permission versus forgiveness here and elsewhere - move to methods?
+                        for c in self.exchange.confirm_trade_collector:
+                            trader = self.trader_dict[c['trader']]
+                            trader.confirm_trade_local(c)
+                    top_of_book = self.exchange.report_top_of_book(current_time)
                 else:
                     row[0].process_signal(current_time, self.q_take[current_time])
                     self.exchange.process_order(row[0].quote_collector[-1])
@@ -231,4 +254,49 @@ class Runner(object):
             if not np.remainder(current_time, 2000):
                 self.exchange.order_history_to_h5(self.h5filename)
                 self.exchange.sip_to_h5(self.h5filename)
+
+                
+if __name__ == '__main__':
+    
+    start = time.time()
+    print(start) 
+    
+    random.seed(5)
+    np.random.seed(5)
+    
+#    num_mms=1
+#    mm_maxq=1
+#    mm_quotes=5
+#    mm_quote_range=20
+#    mm_delta=0.05
+#    num_takers=100
+#    taker_maxq=1
+#    num_nts=50 
+#    nt_maxq=1
+#    num_providers=45
+#    provider_maxq=1
+#    q_provide=0.5
+#    alpha=0.0375
+#    mu=0.0005
+#    mu_nt=0.001
+#    delta=0.025
+#    lambda0=100
+#    wn=0.001
+#    c_lambda=50.0
+#    run_steps=100000
+    mpi=1
+#    h5filename='test.h5'  
+    h5_root = 'test_noisetrader'
+    alpha_pj = 0.05
+    pj = False
+
+    h5dir = 'C:\\Users\\user\\Documents\\Agent-Based Models\\h5 files\\TempTests\\'
+    h5_file = '%s%s.h5' % (h5dir, h5_root)
+    
+    if pj:
+        market1 = Runner(alpha_pj=alpha_pj, h5filename=h5_file)
+    else:
+        market1 = Runner(mpi=mpi, h5filename=h5_file)
+    
+    print('Run 2: %.2f minutes' % ((time.time() - start)/60))
     

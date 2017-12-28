@@ -514,10 +514,8 @@ class TestOrderbook(unittest.TestCase):
             self.ex1.add_order_to_book(buy)
             self.ex1.add_order_to_book(sell)
             self.ex1.report_top_of_book(j+1)
-        tob_check_pre = {'timestamp': 6, 'best_bid': 50, 'best_ask': 52, 'bid_size': 3, 'ask_size': 3, 'lag_spread': 2.0,
-                        'lag_bid_depth': 2.4, 'lag_ask_depth': 2.4}
+        tob_check_pre = {'timestamp': 6, 'best_bid': 50, 'best_ask': 52, 'bid_size': 3, 'ask_size': 3, 'lag_spread': 2.0}
         self.assertDictEqual(self.ex1._sip_collector[-1], tob_check_pre)
-        #print(self.ex1._sip_collector[-1])
         
     def test_market_collapse(self):
         '''
