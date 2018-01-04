@@ -179,12 +179,12 @@ returns_collector = []
 #wn=0.001
 c_lambda=5.0
 #run_steps=100000
-mpi=1
+mpi=5
 #h5filename='test.h5'  
 alpha_pj = 0.001
 pj = False
 trial_no = 1002
-end = 11
+end = 101
 
 h5_out = 'C:\\Users\\user\\Documents\\Agent-Based Models\\h5 files\\Trial %d\\ABMSmallCapSum.h5' % trial_no
        

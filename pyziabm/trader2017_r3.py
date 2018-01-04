@@ -166,9 +166,9 @@ class NoiseTrader(ZITrader):
         # q_taker > 0.5 implies greater probability of a buy order
         side = 'buy' if random.uniform(0,1) < q_taker else 'sell'
         if side == 'buy':
-            price = 2000000 if qsignal['best_ask'] - qsignal['best_bid'] < qsignal['lag_spread'] else qsignal['best_bid']
+            price = 2000000 if qsignal['best_ask'] - qsignal['best_bid'] <= qsignal['lag_spread'] else qsignal['best_bid']
         else:
-            price = 0 if qsignal['best_ask'] - qsignal['best_bid'] < qsignal['lag_spread'] else qsignal['best_ask']
+            price = 0 if qsignal['best_ask'] - qsignal['best_bid'] <= qsignal['lag_spread'] else qsignal['best_ask']
         q = self._make_add_quote(time, self._max_quantity, side, price)
         self.quote_collector.append(q)
         
