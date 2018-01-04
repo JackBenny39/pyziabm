@@ -4,19 +4,21 @@ import numpy as np
 import pandas as pd
 
 from pyziabm.orderbook3 import Orderbook
-from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper
+from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper, InformedTrader
 
 
 class Runner(object):
     def __init__(self, num_mms=1, mm_maxq=1, mm_quotes=12, mm_quote_range=60, mm_delta=0.025, 
                  num_takers=50, taker_maxq=1, num_providers=38, provider_maxq=1, q_provide=0.5,
-                 alpha=0.0375, mu=0.001, delta=0.025, lambda0=100, wn=0.001, c_lambda=1.0, run_steps=100000,
+                 informed_maxq=1, informed_runlength=2, informed_mu=1000,
+                 alpha=0.0375, mu=0.001, delta=0.025, lambda0=100, wn=0.001, c_lambda=1.0, run_steps=1000,
                  mpi=5, h5filename='test.h5', alpha_pj=0):
         self.alpha_pj = alpha_pj
         self.q_provide = q_provide
         self.lambda0 = lambda0
         self.run_steps = run_steps+1
         self.t_delta_t, self.taker_array = self.make_taker_array(taker_maxq, num_takers, mu)
+        self.t_delta_i, self.informed_trader = self.make_informed_trader(informed_maxq, informed_runlength, informed_mu)
         self.t_delta_p, self.provider_array = self.make_provider_array(provider_maxq, num_providers, delta, mpi, alpha)
         self.t_delta_m, self.marketmaker_array = self.make_marketmaker_array(mm_maxq, num_mms, mm_quotes, mm_quote_range, mm_delta, mpi)
         self.pennyjumper = self.make_pennyjumper(mpi)
@@ -49,6 +51,22 @@ class Runner(object):
         takers_list = ['t%i' % i for i in range(num_takers)]
         takers = np.array([Taker(t,i) for t,i in zip(takers_list,taker_size)])
         return t_delta_t, takers
+    
+    def make_informed_trader(self, maxq, runlength, mu):
+        default_arr = np.array([1, 5, 10, 25, 50])
+        actual_arr = default_arr[default_arr<=maxq]
+        informed_size = np.random.choice(actual_arr)
+        t_delta_i = np.random.randint(1, 100000, size=mu)
+        if runlength > 1:
+            stack = t_delta_i
+            for i in range(runlength):
+                temp = t_delta_i+i+1
+                stack = np.hstack((stack, temp))
+            t_delta_i = np.unique(stack)
+        sides = ['buy', 'sell']
+        informed_side = np.random.choice(sides)
+        informed_trader = InformedTrader('i0',informed_size,informed_side)
+        return t_delta_i, informed_trader
     
     def make_provider_array(self, maxq, num_providers, delta, mpi, alpha):
         default_arr = np.array([1, 5, 10, 25, 50])
@@ -96,10 +114,12 @@ class Runner(object):
         providers_mask = np.remainder(step, self.t_delta_p)==0
         takers_mask = np.remainder(step, self.t_delta_t)==0
         marketmakers_mask = np.remainder(step, self.t_delta_m)==0
+        informed_mask = step in self.t_delta_i
         providers = np.vstack((self.provider_array, providers_mask)).T
         takers = np.vstack((self.taker_array, takers_mask)).T
         marketmakers = np.vstack((self.marketmaker_array, marketmakers_mask)).T
-        traders = np.vstack((providers, marketmakers, takers[takers_mask]))
+        informed = np.squeeze(np.vstack((self.informed_trader, informed_mask)).T)
+        traders = np.vstack((providers, marketmakers, takers[takers_mask], informed[informed_mask]))
         np.random.shuffle(traders)
         return traders
     
@@ -158,6 +178,14 @@ class Runner(object):
                             if self.exchange.confirm_modify_collector: # <---- Check permission versus forgiveness here and elsewhere - move to methods?
                                 row[0].confirm_cancel_local(self.exchange.confirm_modify_collector[0])
                         top_of_book = self.exchange.report_top_of_book(current_time)
+                elif row[0].trader_type == 'InformedTrader':
+                    row[0].process_signal(current_time)
+                    self.exchange.process_order(row[0].quote_collector[-1])
+                    if self.exchange.traded: # <---- Check permission versus forgiveness here and elsewhere - move to methods?
+                        for c in self.exchange.confirm_trade_collector:
+                            trader = self.trader_dict[c['trader']]
+                            trader.confirm_trade_local(c)
+                        top_of_book = self.exchange.report_top_of_book(current_time)
                 else:
                     row[0].process_signal(current_time, self.q_take[current_time])
                     self.exchange.process_order(row[0].quote_collector[-1])
@@ -199,6 +227,14 @@ class Runner(object):
                             self.exchange.process_order(c)
                             if self.exchange.confirm_modify_collector: # <---- Check permission versus forgiveness here and elsewhere - move to methods?
                                 row[0].confirm_cancel_local(self.exchange.confirm_modify_collector[0])
+                        top_of_book = self.exchange.report_top_of_book(current_time)
+                elif row[0].trader_type == 'InformedTrader':
+                    row[0].process_signal(current_time)
+                    self.exchange.process_order(row[0].quote_collector[-1])
+                    if self.exchange.traded: # <---- Check permission versus forgiveness here and elsewhere - move to methods?
+                        for c in self.exchange.confirm_trade_collector:
+                            trader = self.trader_dict[c['trader']]
+                            trader.confirm_trade_local(c)
                         top_of_book = self.exchange.report_top_of_book(current_time)
                 else:
                     row[0].process_signal(current_time, self.q_take[current_time])
@@ -245,7 +281,7 @@ if __name__ == '__main__':
 #    run_steps=100000
 #    mpi=1
 #    h5filename='test.h5'  
-    h5_root = 'mm1_mpi1test999'
+    h5_root = 'mm1_nt01'
     alpha_pj = 0.05
     pj = False
 
