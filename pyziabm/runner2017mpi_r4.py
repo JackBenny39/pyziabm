@@ -10,7 +10,7 @@ class Runner(object):
     def __init__(self, prime1=20, num_mms=1, mm_maxq=1, mm_quotes=12, mm_quote_range=60, mm_delta=0.025, 
                  num_takers=50, taker_maxq=1, num_providers=38, provider_maxq=1, q_provide=0.5,
                  informed_maxq=1, informed_runlength=2, informed_mu=1000,
-                 alpha=0.0375, mu=0.001, delta=0.025, lambda0=100, wn=0.001, c_lambda=1.0, run_steps=100,
+                 alpha=0.0375, mu=0.001, delta=0.025, lambda0=100, wn=0.001, c_lambda=1.0, run_steps=100000,
                  mpi=5, h5filename='test.h5', pj=False, alpha_pj=0):
         self.alpha_pj = alpha_pj
         self.q_provide = q_provide
