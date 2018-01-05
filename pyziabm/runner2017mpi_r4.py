@@ -9,11 +9,10 @@ from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, Marke
 class Runner(object):
     def __init__(self, prime1=20, num_mms=1, mm_maxq=1, mm_quotes=12, mm_quote_range=60, mm_delta=0.025, 
                  num_takers=50, taker_maxq=1, num_providers=38, provider_maxq=1, q_provide=0.5,
-                 informed_maxq=1, informed_runlength=1, informed_mu=10,
+                 informed_maxq=1, informed_runlength=2, informed_mu=1000,
                  alpha=0.0375, mu=0.001, delta=0.025, lambda0=100, wn=0.001, c_lambda=1.0, run_steps=100,
                  mpi=5, h5filename='test.h5', pj=False, alpha_pj=0):
         self.alpha_pj = alpha_pj
-        print(self.alpha_pj)
         self.q_provide = q_provide
         self.lambda0 = lambda0
         self.run_steps = run_steps+1
@@ -64,7 +63,7 @@ class Runner(object):
         default_arr = np.array([1, 5, 10, 25, 50])
         actual_arr = default_arr[default_arr<=maxq]
         informed_size = np.random.choice(actual_arr)
-        t_delta_i = np.random.randint(1, 100000, size=mu)
+        t_delta_i = np.random.randint(1, self.run_steps, size=mu)
         if runlength > 1:
             stack = t_delta_i
             for i in range(runlength):
@@ -74,7 +73,6 @@ class Runner(object):
         sides = ['buy', 'sell']
         informed_side = np.random.choice(sides)
         informed_trader = InformedTrader('i0',informed_size,informed_side)
-        print(informed_trader)
         return t_delta_i, informed_trader
     
     def make_provider_array(self, maxq, num_providers, delta, mpi, alpha):

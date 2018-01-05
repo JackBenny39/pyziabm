@@ -56,7 +56,7 @@ class Runner(object):
         default_arr = np.array([1, 5, 10, 25, 50])
         actual_arr = default_arr[default_arr<=maxq]
         informed_size = np.random.choice(actual_arr)
-        t_delta_i = np.random.randint(1, 100000, size=mu)
+        t_delta_i = np.random.randint(1, self.run_steps, size=mu)
         if runlength > 1:
             stack = t_delta_i
             for i in range(runlength):
@@ -101,6 +101,7 @@ class Runner(object):
         takers_dict.update(providers_dict)
         marketmakers_dict = dict(zip(['m%i' % i for i in range(num_mms)], list(self.marketmaker_array)))
         takers_dict.update(marketmakers_dict)
+        takers_dict.update({'i0': self.informed_trader})
         if self.alpha_pj > 0:
             takers_dict.update({'j0': self.pennyjumper})
         return takers_dict
@@ -269,6 +270,9 @@ if __name__ == '__main__':
 #    mm_delta=0.05
 #    num_takers=100
 #    taker_maxq=1
+#    informed_maxq=1
+#    informed_runlength=2
+#    informed_mu=1000
 #    num_providers=45
 #    provider_maxq=1
 #    q_provide=0.5
