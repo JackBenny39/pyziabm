@@ -63,11 +63,16 @@ class Runner(object):
         informed_trades = informed_mu*np.sum(self.run_steps/self.t_delta_t)
         t_delta_i = np.random.choice(self.run_steps, size=np.int(informed_trades/(runlength*maxq)), replace=False)
         if runlength > 1:
-            stack = t_delta_i
-            for i in range(runlength):
-                temp = t_delta_i+i+1
-                stack = np.hstack((stack, temp))
-            t_delta_i = np.unique(stack)
+            stack1 = t_delta_i
+            s_length = len(t_delta_i)
+            for i in range(1, runlength):
+                temp = t_delta_i+i
+                stack2 = np.unique(np.hstack((stack1, temp)))
+                repeats = (i+1)*s_length - len(set(stack2))
+                new_choice_set = set(range(self.run_steps)) - set(stack2)
+                extras = np.random.choice(list(new_choice_set), size=repeats, replace=False)
+                stack1 = np.hstack((stack2, extras))
+            t_delta_i = stack1
         sides = ['buy', 'sell']
         informed_side = np.random.choice(sides)
         informed_trader = InformedTrader('i0', maxq, informed_side)

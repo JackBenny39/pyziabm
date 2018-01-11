@@ -56,11 +56,16 @@ class Runner(object):
         informed_trades = informed_mu*np.sum(self.run_steps/self.t_delta_t)
         t_delta_i = np.random.choice(self.run_steps, size=np.int(informed_trades/(runlength*maxq)), replace=False)
         if runlength > 1:
-            stack = t_delta_i
-            for i in range(runlength):
-                temp = t_delta_i+i+1
-                stack = np.hstack((stack, temp))
-            t_delta_i = np.unique(stack)
+            stack1 = t_delta_i
+            s_length = len(t_delta_i)
+            for i in range(1, runlength):
+                temp = t_delta_i+i
+                stack2 = np.unique(np.hstack((stack1, temp)))
+                repeats = (i+1)*s_length - len(set(stack2))
+                new_choice_set = set(range(self.run_steps)) - set(stack2)
+                extras = np.random.choice(list(new_choice_set), size=repeats, replace=False)
+                stack1 = np.hstack((stack2, extras))
+            t_delta_i = stack1
         sides = ['buy', 'sell']
         informed_side = np.random.choice(sides)
         informed_trader = InformedTrader('i0', maxq, informed_side)
@@ -268,8 +273,8 @@ if __name__ == '__main__':
 #    mm_delta=0.05
 #    num_takers=100
 #    taker_maxq=1
-#    informed_maxq=1
-#    informed_runlength=2
+    informed_maxq=1
+    informed_runlength=2
 #    informed_mu=0.01
 #    num_providers=45
 #    provider_maxq=1
@@ -283,7 +288,7 @@ if __name__ == '__main__':
 #    run_steps=100000
 #    mpi=1
 #    h5filename='test.h5'  
-    h5_root = 'mm1_nt02'
+    h5_root = 'mm1_nt1_2'
     alpha_pj = 0.05
     pj = False
 
@@ -293,7 +298,7 @@ if __name__ == '__main__':
     if pj:
         market1 = Runner(alpha_pj=alpha_pj, h5filename=h5_file)
     else:
-        market1 = Runner(h5filename=h5_file)
+        market1 = Runner(informed_maxq=1, informed_runlength=1, h5filename=h5_file)
         
     market1.seed_orderbook()
     market1.make_setup(20)
