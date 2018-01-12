@@ -2,7 +2,7 @@ import random
 import numpy as np
 import unittest
 
-from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper
+from pyziabm.trader2017_r3 import Provider, Provider5, Taker, MarketMaker, MarketMaker5, PennyJumper, InformedTrader
 
 
 class TestTrader(unittest.TestCase):
@@ -21,6 +21,8 @@ class TestTrader(unittest.TestCase):
         self.p1 = Provider('p1', 1, 1, 0.05)
         self.p5 = Provider5('p5', 1, 5, 0.05)
         self.t1 = Taker('t1', 1)
+        self.i1 = InformedTrader('i1', 1, 'buy')
+        self.i2 = InformedTrader('i2', 2, 'sell')
         self.m1 = MarketMaker('m1', 1, 1, 0.05, 12, 60)
         self.m5 = MarketMaker5('m5', 1, 5, 0.05, 12, 60)
         self.j1 = PennyJumper('j1', 1, 5)
@@ -82,6 +84,31 @@ class TestTrader(unittest.TestCase):
         self.assertEqual(len(self.t1.quote_collector), 1)
         self.assertEqual(self.t1.quote_collector[0]['side'], 'sell')
         self.assertEqual(self.t1.quote_collector[0]['price'], 0)
+        
+# InformedTrader tests
+
+    def test_repr_InformedTrader(self):
+        #print('Provider: {0}, Taker: {1}'.format(self.p1, self.t1))
+        self.assertEqual('Taker: Trader(i1, 1, InformedTrader)', 'Taker: {0}'.format(self.i1))
+        self.assertEqual('Taker: Trader(i2, 2, InformedTrader)', 'Taker: {0}'.format(self.i2))
+        
+    def test_process_signal_InformedTrader(self):
+        '''
+        Generates a quote object (dict) and appends to quote_collector
+        '''
+        time1 = 1
+        self.assertFalse(self.t1.quote_collector)
+        self.i1.process_signal(time1)
+        self.assertEqual(len(self.i1.quote_collector), 1)
+        self.assertEqual(self.i1.quote_collector[0]['side'], 'buy')
+        self.assertEqual(self.i1.quote_collector[0]['price'], 2000000)
+        self.assertEqual(self.i1.quote_collector[0]['quantity'], 1)
+        time2 = 2
+        self.i2.process_signal(time2)
+        self.assertEqual(len(self.i2.quote_collector), 1)
+        self.assertEqual(self.i2.quote_collector[0]['side'], 'sell')
+        self.assertEqual(self.i2.quote_collector[0]['price'], 0)
+        self.assertEqual(self.i2.quote_collector[0]['quantity'], 2)
         
 # Provider tests  
 
