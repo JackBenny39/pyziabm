@@ -35,7 +35,7 @@ There are five files:
 ### runner2017mpi_r3.py
 * Contains the Runner class.
 * Instances set up and run 1 simulation.
-* Note: the \__init\__() uses all keywords - these are the defaults. User can change them here or override them when instantiating in \__main\__().
+* Note: the \_\_init\_\_() uses all keywords - these are the defaults. User can change them here or override them when instantiating in \_\_main\_\_().
 * Note: User should specify proper paths for saving output.
 * Imported by runwrapper2017mpi_r3.py.
 
