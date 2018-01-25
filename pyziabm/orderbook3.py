@@ -41,7 +41,6 @@ class Orderbook(object):
         self.confirm_trade_collector = []
         self._sip_collector = []
         self.trade_book = []
-        #self.last_time = 0
         self._order_index = 0
         self.traded = False
 
@@ -56,8 +55,7 @@ class Orderbook(object):
     def add_order_to_book(self, order):
         '''
         Use insort to maintain on ordered list of prices which serve as pointers
-        to the orders - for random price grid, check "not in" list, for more realistic
-        books, check "in" list (TODO).
+        to the orders.
         '''
         book_order = {'order_id': order['order_id'], 'timestamp': order['timestamp'], 'type': order['type'], 
                       'quantity': order['quantity'], 'side': order['side'], 'price': order['price']}
@@ -67,15 +65,15 @@ class Orderbook(object):
         else:
             book_prices = self._ask_book_prices
             book = self._ask_book 
-        if order['price'] not in book_prices:
-            bisect.insort(book_prices, order['price'])
-            book[order['price']] = {'num_orders': 1, 'size': order['quantity'], 'order_ids': [order['order_id']],
-                                     'orders': OrderedDict([(order['order_id'],  book_order)])}
-        else:
+        if order['price'] in book_prices:
             book[order['price']]['num_orders'] += 1
             book[order['price']]['size'] += order['quantity']
             book[order['price']]['order_ids'].append(order['order_id'])
             book[order['price']]['orders'][order['order_id']] =  book_order
+        else:
+            bisect.insort(book_prices, order['price'])
+            book[order['price']] = {'num_orders': 1, 'size': order['quantity'], 'order_ids': [order['order_id']],
+                                    'orders': OrderedDict([(order['order_id'],  book_order)])}
             
     def _remove_order(self, order_side, order_price, order_id):
         '''Pop the order_id; if  order_id exists, updates the book.'''
@@ -164,13 +162,13 @@ class Orderbook(object):
                         if remainder >= book_order['quantity']:
                             self._confirm_trade(order['timestamp'], book_order['side'], book_order['quantity'], book_order['order_id'], book_order['price'])
                             self._add_trade_to_book(book_order['order_id'], book_order['timestamp'], order['order_id'], order['timestamp'], book_order['price'], 
-                                                   book_order['quantity'], order['side'])
+                                                    book_order['quantity'], order['side'])
                             self._remove_order(book_order['side'], book_order['price'], book_order['order_id'])
                             remainder -= book_order['quantity']
                         else:
                             self._confirm_trade(order['timestamp'], book_order['side'], remainder, book_order['order_id'], book_order['price'])
                             self._add_trade_to_book(book_order['order_id'], book_order['timestamp'], order['order_id'], order['timestamp'], book_order['price'],
-                                                   remainder, order['side'])
+                                                    remainder, order['side'])
                             self._modify_order(book_order['side'], remainder, book_order['order_id'], book_order['price'])
                             break
                     else:
@@ -193,13 +191,13 @@ class Orderbook(object):
                         if remainder >= book_order['quantity']:
                             self._confirm_trade(order['timestamp'], book_order['side'], book_order['quantity'], book_order['order_id'], book_order['price'])
                             self._add_trade_to_book(book_order['order_id'], book_order['timestamp'], order['order_id'], order['timestamp'], book_order['price'],
-                                                   book_order['quantity'], order['side'])
+                                                    book_order['quantity'], order['side'])
                             self._remove_order(book_order['side'], book_order['price'], book_order['order_id'])
                             remainder -= book_order['quantity']
                         else:
                             self._confirm_trade(order['timestamp'], book_order['side'], remainder, book_order['order_id'], book_order['price'])
                             self._add_trade_to_book(book_order['order_id'], book_order['timestamp'], order['order_id'], order['timestamp'], book_order['price'],
-                                                   remainder, order['side'])
+                                                    remainder, order['side'])
                             self._modify_order(book_order['side'], remainder, book_order['order_id'], book_order['price'])
                             break
                     else:
@@ -209,7 +207,6 @@ class Orderbook(object):
                 else:
                     print('Bid Market Collapse with order {0}'.format(order))
                     break
-        #self.last_time = order['timestamp'] 
         
     def order_history_to_h5(self, filename):
         '''Append order history to an h5 file, clear the order_history'''

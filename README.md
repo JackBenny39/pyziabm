@@ -35,7 +35,7 @@ There are five files:
 ### runner2017mpi_r3.py
 * Contains the Runner class.
 * Instances set up and run 1 simulation.
-* Note: the __init__() uses all keywords - these are the defaults. User can change them here or override them when instantiating in __main__().
+* Note: the \__init\__() uses all keywords - these are the defaults. User can change them here or override them when instantiating in \__main\__().
 * Note: User should specify proper paths for saving output.
 * Imported by runwrapper2017mpi_r3.py.
 
@@ -49,7 +49,7 @@ There are five files:
 
 There are two test files:
 1. testOrderbook3.py
-2. testTrader2017_r3.p7
+2. testTrader2017_r3.py
 
 There are several Jupyter Notebooks that should work with minimal changes to the directories.
 
