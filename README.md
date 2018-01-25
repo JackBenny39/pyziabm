@@ -14,7 +14,7 @@ import pyziabm as pzi
 
 pzi.Runner()
 
-will call the simulation with the defaults. To change the defaults and run several in a loop see the runwrapper files detailed below. To keep all of the data from one simulation in memmory, assign to a variable:
+will call the simulation with the defaults. To change the defaults and run several in a loop see the runwrapper files detailed below. To keep all of the data from one simulation in memory, assign to a variable:
 
 sim1 = pzi.Runner()
 
