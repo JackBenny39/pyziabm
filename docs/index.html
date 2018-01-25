@@ -17,14 +17,14 @@
   
   <div class="Overview">
     <h2>Overview</h2>
-    <p>The code in this GitHub repository was used to generate the results in "Increasing the minimum price increment boosts market-maker profitability" by Charles Collver.</p>
+    <p>The code in this GitHub repository was used to generate the results in "An application of agent-based modeling to market structure policy: the case of the U.S. Tick Size Pilot Program and market maker profitability" by Charles Collver.</p>
     <p>You can download or fork the <a href="https://github.com/JackBenny39/pyziabm">code</a> and run it yourself.</p>
     <p>Or, you can use one of the <a href="https://github.com/JackBenny39/pyziabm">conda packages</a> by downloading and installing or by: conda install -c dennycrane pyziabm. For now, there are Python3.6 versions in Windows, Unix and Mac.</p>
   </div>
   
   <div class="Layout">
     <h2>Code Layout</h2>
-    <p>There are six files:</p>
+    <p>There are seven files:</p>
     <ol>
       <li>orderbook3.py</li>
       <li>trader2017_r3.py</li>
@@ -32,6 +32,7 @@
       <li>runner2017mpi_r4.py</li>
       <li>runwrapper2017mpi_r3.py</li>
       <li>runwrapper2017mpi_r3x.py</li>
+      <li>runwrapper2017mpi_r4.py</li>
     </ol>
       
     <h3>orderbook3.py</h3>
@@ -56,7 +57,7 @@
       <li>Imported by runwrapper2017mpi_r3.py.</li>
     </ul>
     
-    <h3>runwrapper2017mpi_r3.py</h3>
+    <h3>runwrapper2017mpi_r3.py and runwrapper2017mpi_r4.py</h3>
     <ul>
       <li>Runs the simulations in a loop, does some summary output bookkeeping.</li>
       <li>Note: User should specify proper paths for saving output.</li>
@@ -72,8 +73,8 @@
   <div class="Conda">
     <h2>Working With Conda</h2>
     <p>The easiest way to get started is to use IPython or a Jupyter Notebook:</p>
-    <p><code>>>>from pyziabm.runner2017mpi_r4 import Runner</code></p>
-    <p><code>>>>Runner()</code></p>
+    <p><code>>>>import pyziabm as pzi</code></p>
+    <p><code>>>>pzi.Runner()</code></p>
     <p>This will take a few minutes to run and will generate an hdf5 file named test.h5 in the working directory.</p>
     <p>The <a href="https://github.com/JackBenny39/pyziabm">code in GitHub</a> provides some example Jupyter Notebooks for working with the output data.</p>
     <p>The Runner instantiation takes all keyword arguments with defaults.</p>
@@ -85,6 +86,7 @@
     <p>To change the inputs, pass them into the Runner call:</p>
     <code>>>>Runner(mpi=1, h5filename='test2.h5', pj=True, alpha_pj=0.01)</code>
     <p>To run in a loop and collect output consistent with the paper, see the details for working with the runwrappers below.</p>
+    <p>To replicate the results in the paper, you must implement the random seeds as described in the runwrapper files.</p>
   </div>
   
   <div class="Source">
