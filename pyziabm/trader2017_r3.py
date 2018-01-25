@@ -141,30 +141,6 @@ class Taker(ZITrader):
         self.quote_collector.append(q)
         
         
-class InformedTrader(Taker):
-    '''
-    InformedTrader generates quotes (dicts) based upon a fixed direction
-    
-    Subclass of Taker
-    Public attributes: trader_type, quote_collector (from ZITrader)
-    Public methods: process_signal
-    '''
-    
-    def __init__(self, name, maxq, side):
-        ZITrader.__init__(self, name, maxq)
-        self.trader_type = 'InformedTrader'
-        self._side = side
-        self._price = 0 if side == 'sell' else 2000000
-        
-    def __repr__(self):
-        return 'Trader({0}, {1}, {2})'.format(self._trader_id, self._max_quantity, self.trader_type)
-        
-    def process_signal(self, time):
-        '''InformedTrader buys or sells pre-specified attribute.'''
-        q = self._make_add_quote(time, self._max_quantity, self._side, self._price)
-        self.quote_collector.append(q)
-        
-        
 class Provider(ZITrader):
     '''
     Provider generates quotes (dicts) based on make probability.

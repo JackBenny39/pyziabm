@@ -96,7 +96,7 @@ def tradesrets_to_list(h5in, outlist):
                     'KurtosisRet': indf.ret.kurtosis(), 'MCRun': j}
     outlist.append(returns_dict)
 
-def canceltrade_to_list(h5in, outlist1, outlist2, pj):
+def canceltrade_to_list(h5in, outlist1, outlist2):
     order_df = pd.read_hdf(h5in, 'orders')
     order_df = order_df.assign(trader_id = order_df.order_id.str.split('_').str[0])
     lpsum_df = order_df.groupby(['trader_id','type']).quantity.sum().unstack(level=-1)

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
    name='pyziabm',
-   version='0.1.0',
+   version='0.1.0b',
    description='Zero Intelligence Agent-Based Model of Modern Limit Order Book',
    author='Charles Collver',
    author_email='charlesdcollver@gmail.com',
