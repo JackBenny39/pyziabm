@@ -31,7 +31,7 @@ There are seven files:
 
 ### trader2017_r3.py
 * Contains the base ZITrader class and six subclasses: PennyJumper, Taker, Provider, Provider5, MarketMaker, MarketMaker5.
-* There is also an InformedTrader, but it is yet unimplemented. See [pyziabmc](https://jackbenny39/pyziabmc) for more details.
+* There is also an InformedTrader, but it is yet unimplemented. See [pyziabmc](https://github.com/jackbenny39/pyziabmc) for more details.
 * Imported by runner2017mpi_r3.py and runner2017mpi_r4.py.
 
 ### runner2017mpi_r3.py and runner2017mpi_r4.py
