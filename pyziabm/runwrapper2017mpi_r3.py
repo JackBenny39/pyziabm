@@ -94,7 +94,7 @@ def tradesrets_to_list(h5in, outlist):
                     'KurtosisRet': indf.ret.kurtosis(), 'MCRun': j}
     outlist.append(returns_dict)
     
-def canceltrade_to_list(h5in, outlist1, outlist2, pj):
+def canceltrade_to_list(h5in, outlist1, outlist2):
     order_df = pd.read_hdf(h5in, 'orders')
     order_df = order_df.assign(trader_id = order_df.order_id.str.split('_').str[0])
     lpsum_df = order_df.groupby(['trader_id','type']).quantity.sum().unstack(level=-1)
@@ -185,17 +185,17 @@ returns_collector = []
 #h5filename='test.h5'  
 alpha_pj = 0.001
 pj = False
-trial_no = 801
-end = 101
+trial_no = 8001
+end = 6
 
-h5_out = 'C:\\path\\to\\permanent\\h5 files\\Trial %d\\ABMSmallCapSum.h5' % trial_no
+h5_out = 'C:\\Users\\user\\Documents\\Agent-Based Models\\h5 files\\Trial %d\\ABMSmallCapSum.h5' % trial_no
        
 start = time.time()
 print(start)       
 for j in range(1,end):
     random.seed(j)
     np.random.seed(j)
-    h5_file = 'C:\\path\\to\\temporary\\h5 files\\Trial %d\\smallcap_%d.h5' % (trial_no, j)
+    h5_file = 'C:\\Users\\user\\Documents\\Agent-Based Models\\h5 files\\Trial %d\\smallcap_%d.h5' % (trial_no, j)
     if pj:
         market1 = Runner(alpha_pj=alpha_pj, h5filename=h5_file)
     else:
@@ -214,7 +214,7 @@ for j in range(1,end):
     position_to_list(market1.h5filename, position_collector)
     profit_to_list(market1.h5filename, profit_collector)
     spread_to_list(market1.h5filename, spread_collector)
-    canceltrade_to_list(market1.h5filename, canceltrade_collector, by_mm_collector, pj)
+    canceltrade_to_list(market1.h5filename, canceltrade_collector, by_mm_collector)
     tradesrets_to_list(market1.h5filename, returns_collector)
 #    os.remove(market1.h5filename)
     

@@ -169,9 +169,6 @@ returns_collector = []
 #mm_delta=0.05
 #num_takers=100
 #taker_maxq=1
-#informed_maxq=1
-#informed_runlength=2
-#informed_mu=1000
 #num_providers=38
 #provider_maxq=1
 #q_provide=0.5
@@ -186,17 +183,17 @@ mpi=1
 #h5filename='test.h5'  
 alpha_pj = 0.001
 pj = False
-trial_no = 1
-end = 11
+trial_no = 1001
+end = 6
 
-h5_out = 'C:\\Users\\user\\Documents\\Agent-Based Models\\h5 files\\Trial %d\\ABMInformedTraderSum.h5' % trial_no
+h5_out = 'C:\\Users\\user\\Documents\\Agent-Based Models\\h5 files\\Trial %d\\ABMSmallCapSum.h5' % trial_no
        
 start = time.time()
 print(start)       
-for j in range(1,end):
+for j in range(1, end):
     random.seed(j)
     np.random.seed(j)
-    h5_file = 'C:\\Users\\user\\Documents\\Agent-Based Models\\h5 files\\Trial %d\\informed_%d.h5' % (trial_no, j)
+    h5_file = 'C:\\Users\\user\\Documents\\Agent-Based Models\\h5 files\\Trial %d\\smallcap_%d.h5' % (trial_no, j)
     if pj:
         market1 = Runner(alpha_pj=alpha_pj, h5filename=h5_file)
     else:
