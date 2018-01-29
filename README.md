@@ -3,7 +3,7 @@ Zero Intelligence Agent-Based Model of Modern Limit Order Book
 
 Charles Collver, PhD
 
-See the [Project Website](https://jackbenny39.github.io/pyziabm/) for more details.
+See the [Project Website](https://jackbenny39.github.io/pyziabm/) for more details and [radicalmarketsimulation](https://radicalmarketsimulation.com) for a more general discussion of applying agent-based modeling to financial markets.
 
 If you just want to install and run a quick simulation:
 conda install -c dennycrane pyziabm
