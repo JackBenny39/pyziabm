@@ -68,7 +68,7 @@ class Orderbook(object):
             book[order['price']]['num_orders'] += 1
             book[order['price']]['size'] += order['quantity']
             book[order['price']]['order_ids'].append(order['order_id'])
-            book[order['price']]['orders'][order['order_id']] =  book_order
+            book[order['price']]['orders'][order['order_id']] = book_order
         else:
             bisect.insort(book_prices, order['price'])
             book[order['price']] = {'num_orders': 1, 'size': order['quantity'], 'order_ids': [order['order_id']],
